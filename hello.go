@@ -1,15 +1,15 @@
 package main
 
 import (
-"fmt"
-"net/http"
-"html/template"
-"log"
-"os"
-"path"
-"database/sql"
-_ "github.com/go-sql-driver/mysql"
-"./gcm"
+	"fmt"
+	"net/http"
+	"html/template"
+	"log"
+	"os"
+	"path"
+	"database/sql"
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/amarjain07/ladoo/gcm"
 )
 
 func main() {
@@ -17,12 +17,26 @@ func main() {
 	http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir("css")))) 
 	http.Handle("/img/", http.StripPrefix("/img/", http.FileServer(http.Dir("img")))) 
 	http.HandleFunc("/register/", registrationHandler)
-	http.HandleFunc("/", sampleHandler)
+	http.HandleFunc("/gcm/register/", gcmHandler)
+	http.HandleFunc("/gcm/send/all/", gcmSendHandler)
+	http.HandleFunc("/", templateHandler)
 	http.ListenAndServe(":8080", nil)
 }
 
-func sampleHandler(w http.ResponseWriter, r *http.Request) {
-	gcm.Printg(w, r)
+func gcmSendHandler(w http.ResponseWriter, r *http.Request) {
+	if(r.Method == "POST"){
+		gcm.SendToAll(w, r)
+	}else{
+		http.NotFound(w, r)
+	}
+}
+
+func gcmHandler(w http.ResponseWriter, r *http.Request) {
+	if(r.Method == "POST"){
+		gcm.Register(w, r)
+	}else{
+		http.NotFound(w, r)
+	}
 }
 
 func registrationHandler(w http.ResponseWriter, r *http.Request) {
